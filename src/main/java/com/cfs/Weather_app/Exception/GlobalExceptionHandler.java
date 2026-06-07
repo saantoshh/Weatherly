@@ -25,10 +25,7 @@ public class GlobalExceptionHandler {
     // 1. Our own custom exception (city not found,
     //    API unreachable, etc.)
     // ─────────────────────────────────────────────
-    @ExceptionHandler(WeatherApiException.class)
-    public ResponseEntity<Map<String, Object>> handleWeatherApiException(WeatherApiException ex) {
-        return buildResponse(ex.getStatus(), ex.getMessage(), "Weather API Error");
-    }
+
 
     // ─────────────────────────────────────────────
     // 2. Network / DNS / timeout failures

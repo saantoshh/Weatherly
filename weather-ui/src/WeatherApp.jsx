@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 
 const injectFonts = () => {
@@ -263,13 +263,20 @@ function AnimatedScene({ theme }) {
     doLight.current = t.lightning;
   }, [theme, t.particles, t.lightning, initParticles]);
 
-  const drawBolt = useCallback((ctx, x, y, dx, dy, branches, alpha) => {
+  const drawBolt = useCallback(function drawBolt(ctx, x, y, dx, dy, branches, alpha) {
     if (branches <= 0 || alpha < 0.05) return;
-    const nx = x + dx + (Math.random()-0.5)*50, ny = y + dy;
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny);
-    ctx.strokeStyle = `rgba(200,220,255,${alpha})`; ctx.lineWidth = branches*0.8; ctx.stroke();
-    drawBolt(ctx, nx, ny, dx*(0.6+Math.random()*0.4), dy*(0.6+Math.random()*0.4), branches-1, alpha*0.7);
-    if (Math.random() < 0.4) drawBolt(ctx, nx, ny, (dx+Math.random()*60-30)*0.6, dy*0.5, branches-2, alpha*0.4);
+    const nx = x + dx + (Math.random() - 0.5) * 50;
+    const ny = y + dy;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(nx, ny);
+    ctx.strokeStyle = `rgba(200,220,255,${alpha})`;
+    ctx.lineWidth = branches * 0.8;
+    ctx.stroke();
+    drawBolt(ctx, nx, ny, dx * (0.6 + Math.random() * 0.4), dy * (0.6 + Math.random() * 0.4), branches - 1, alpha * 0.7);
+    if (Math.random() < 0.4) {
+      drawBolt(ctx, nx, ny, (dx + Math.random() * 60 - 30) * 0.6, dy * 0.5, branches - 2, alpha * 0.4);
+    }
   }, []);
 
   useEffect(() => {
@@ -332,11 +339,24 @@ function AnimatedScene({ theme }) {
     return () => cancelAnimationFrame(rafRef.current);
   }, [drawBolt]);
 
-  const clouds = Array.from({ length: t.clouds }, (_, i) => ({
-    w: 120+Math.random()*200, h: 40+Math.random()*60,
-    top: 5+Math.random()*30, dur: 28+Math.random()*40,
-    delay: -Math.random()*40, op: t.cloudOp*(0.4+Math.random()*0.6),
-  }));
+  const clouds = useMemo(() => {
+    const base = (t.clouds + Math.round(t.cloudOp * 100)) * 17;
+    return Array.from({ length: t.clouds }, (_, index) => {
+      const seed = (base + index * 13) % 1000;
+      const rand = (n) => {
+        const value = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
+        return value - Math.floor(value);
+      };
+      return {
+        w: 120 + rand(1) * 200,
+        h: 40 + rand(2) * 60,
+        top: 5 + rand(3) * 30,
+        dur: 28 + rand(4) * 40,
+        delay: -rand(5) * 40,
+        op: t.cloudOp * (0.4 + rand(6) * 0.6),
+      };
+    });
+  }, [t.clouds, t.cloudOp]);
 
   return (
     <div style={{ position:"fixed", inset:0, zIndex:0, overflow:"hidden", background:t.bg, transition:"background 0.9s cubic-bezier(0.16,1,0.3,1)" }}>
@@ -500,8 +520,10 @@ function Placeholder() {
   );
 }
 
-const BASE = "http://localhost:8080/weather";
-
+const BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/weather`
+  : "http://localhost:8080/weather";
+  
 export default function WeatherApp() {
   const [city, setCity]     = useState("");
   const [days, setDays]     = useState(3);
@@ -528,7 +550,8 @@ export default function WeatherApp() {
       const res = await fetch(`${BASE}/forecast/${encodeURIComponent(city.trim())}?days=${selectedDays}`);
       if (!res.ok) {
         let msg = `Server returned ${res.status}`;
-        try { const j = await res.json(); msg = j.message || msg; } catch {}
+        const j = await res.json().catch(() => null);
+        msg = j?.message || msg;
         throw new Error(msg);
       }
       const json = await res.json();
