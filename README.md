@@ -4,11 +4,11 @@
 
 ![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![WeatherAPI](https://img.shields.io/badge/WeatherAPI.com-Live_Data-60c8ff?style=for-the-badge&logo=cloud&logoColor=white)
-![HTML5](https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**A full-stack weather application featuring a Spring Boot REST API backend and a stunning animated frontend with real-time sky scenes.**
+**A full-stack weather application featuring a Spring Boot REST API backend and a stunning React frontend with real-time animated sky scenes, canvas particle effects, and a glassmorphism UI.**
 
 [Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [API Reference](#-api-reference) • [Project Structure](#-project-structure)
 
@@ -20,10 +20,13 @@
 
 - 🌍 **Real-time weather** for any city worldwide via WeatherAPI.com
 - 📅 **Multi-day forecast** — 1, 3, 5, or 7 days
-- 🌦 **Animated sky scenes** — rain, snow, thunder, fog, aurora, and more
-- ⚡ **Live lightning effects** during storm conditions
-- 🌡️ **°C / °F toggle** with smooth transitions
-- 💧 Humidity, pressure, wind speed, visibility stats
+- 🌦 **Animated sky scenes** — rain, snow, thunder, fog, aurora, clear skies and more
+- ⚡ **Live lightning bolt effects** rendered on canvas during storm conditions
+- ❄️ **Particle system** — animated rain drops and snowflakes via `requestAnimationFrame`
+- 🌡️ **°C / °F toggle** with smooth color transitions per temperature range
+- 💧 Humidity bar, pressure, wind speed, and visibility stats
+- 🎨 **Glassmorphism UI** with `backdrop-filter`, frosted cards, and aurora blobs
+- 🔽 **Custom portal dropdown** — fully themed day-selector that escapes stacking contexts
 - 📱 Fully responsive design
 - 🏗️ Clean REST API with proper exception handling
 
@@ -36,9 +39,10 @@
 | **Backend** | Java 17+, Spring Boot 3.x |
 | **HTTP Client** | Spring `RestTemplate` |
 | **Weather Data** | [WeatherAPI.com](https://www.weatherapi.com) |
-| **Frontend** | Vanilla HTML / CSS / JavaScript |
-| **Fonts** | Google Fonts — Outfit + Playfair Display |
-| **Build Tool** | Maven |
+| **Frontend** | React 18+, CSS-in-JS inline styles |
+| **Animations** | Canvas API (`requestAnimationFrame`), CSS keyframes |
+| **Fonts** | Google Fonts — Fraunces (display) + DM Sans (body) |
+| **Build Tool** | Maven + Vite (or CRA) |
 
 ---
 
@@ -50,9 +54,9 @@ Weather_app/
 │   └── main/
 │       ├── java/com/cfs/Weather_app/
 │       │   ├── controller/
-│       │   │   └── Controller.java          # REST endpoints
+│       │   │   └── Controller.java              # REST endpoints
 │       │   ├── dto/
-│       │   │   ├── Root.java                # WeatherAPI root response
+│       │   │   ├── Root.java                    # WeatherAPI root response
 │       │   │   ├── Location.java
 │       │   │   ├── Current.java
 │       │   │   ├── Condition.java
@@ -61,19 +65,23 @@ Weather_app/
 │       │   │   ├── Day.java
 │       │   │   ├── Hour.java
 │       │   │   ├── Astro.java
-│       │   │   ├── WeatherResponse.java     # Current weather DTO
-│       │   │   ├── WeatherForecast.java     # Forecast wrapper DTO
-│       │   │   └── DayTemp.java             # Per-day forecast DTO
+│       │   │   ├── WeatherResponse.java          # Current weather DTO
+│       │   │   ├── WeatherForecast.java          # Forecast wrapper DTO
+│       │   │   └── DayTemp.java                  # Per-day forecast DTO
 │       │   ├── exception/
 │       │   │   ├── WeatherApiException.java
 │       │   │   └── GlobalExceptionHandler.java
 │       │   ├── service/
-│       │   │   └── WeatherService.java      # Business logic
+│       │   │   └── WeatherService.java           # Business logic
 │       │   └── WeatherAppApplication.java
 │       └── resources/
-│           ├── static/
-│           │   └── index.html               # Weatherly frontend
+│           ├── static/                           # Built React output (after npm run build)
 │           └── application.properties
+├── frontend/                                     # React source
+│   ├── src/
+│   │   └── WeatherApp.jsx                        # Main React component
+│   ├── package.json
+│   └── vite.config.js
 ├── .gitignore
 ├── pom.xml
 └── README.md
@@ -87,14 +95,19 @@ Weather_app/
 
 - Java 17 or higher
 - Maven 3.6+
+- Node.js 18+ and npm
 - A free API key from [WeatherAPI.com](https://www.weatherapi.com/signup.aspx)
+
+---
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/saantoshh/weatherly.git
-cd weatherly
+git clone https://github.com/saantoshh/Weatherly.git
+cd Weatherly
 ```
+
+---
 
 ### 2. Configure your API key
 
@@ -110,19 +123,31 @@ weather.api.forecast.url=http://api.weatherapi.com/v1/forecast.json
 server.port=8080
 ```
 
-> ⚠️ **Never commit your real API key.** The `.gitignore` already excludes `application.properties` — see the note below.
+> ⚠️ **Never commit your real API key.** Add `application.properties` to `.gitignore` and commit an `.example` file with placeholder values instead.
 
-### 3. Build and run
+---
+
+### 3. Run the backend
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-The backend starts at `http://localhost:8080`.
+The Spring Boot server starts at `http://localhost:8080`.
 
-### 4. Open the frontend
+---
 
-Navigate to `http://localhost:8080` in your browser — the frontend is served as a static file from Spring Boot.
+### 4. Run the React frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The React dev server starts at `http://localhost:5173` and proxies API calls to `localhost:8080`.
+
+> **For production:** run `npm run build` inside `frontend/`, then copy the `dist/` output into `src/main/resources/static/` so Spring Boot serves it directly.
 
 ---
 
@@ -163,7 +188,7 @@ GET /weather/forecast/{city}?days={1|3|5|7}
 
 ```json
 {
-  "weatherResponse": { ... },
+  "weatherResponse": { "city": "London", "temperature": 18.0, "..." : "..." },
   "dayTemp": [
     {
       "date": "2026-06-07",
@@ -186,42 +211,56 @@ GET /weather/forecast/{city}?days={1|3|5|7}
 GET /weather/test/{city}
 ```
 
-Returns `"Good"` if the server is running.
+Returns `"Good"` if the server is reachable.
+
+---
+
+## 🎨 Frontend Architecture
+
+The React frontend (`WeatherApp.jsx`) is a single-file component with these key parts:
+
+| Component | Purpose |
+|-----------|---------|
+| `AnimatedScene` | Full-screen canvas background — stars, clouds, rain/snow particles, lightning bolts |
+| `HeroCard` | Current weather — large temperature display, stats pills, humidity bar |
+| `ForecastCard` | Day-by-day forecast grid with animated entrance |
+| `CustomSelect` | Portal-based day-selector dropdown themed to match the dark UI |
+| `Skeleton` | Shimmer loading placeholders |
+| `Placeholder` | Empty state with floating globe animation |
+
+Sky themes (`clear`, `rain`, `thunder`, `snow`, `fog`, `cloudy`, `overcast`, `sunny_warm`, `sunny_cool`) are derived from the API condition string and drive the canvas particle mode, aurora opacity, star visibility, and cloud count.
 
 ---
 
 ## 🔐 Keeping Your API Key Safe
 
-Add this to your `.gitignore` to avoid accidentally pushing secrets:
-
 ```gitignore
-# Application secrets
+# application.properties contains secrets — never commit it
 src/main/resources/application.properties
 ```
 
-Then create a template file to commit instead:
+Commit a template instead:
 
 ```bash
 cp src/main/resources/application.properties \
    src/main/resources/application.properties.example
+# Replace real values with placeholders in the .example file, then commit it
 ```
-
-Edit the `.example` file to replace real values with placeholders before committing.
 
 ---
 
 ## 🌐 CORS
 
-The controller uses `@CrossOrigin(origins = "*")`, which allows requests from any origin during development. **Restrict this in production** to your actual frontend domain.
+The controller uses `@CrossOrigin(origins = "*")` for development convenience. **Restrict this to your frontend domain in production.**
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/add-hourly-forecast`
+2. Create your feature branch: `git checkout -b feature/hourly-forecast`
 3. Commit your changes: `git commit -m 'feat: add hourly forecast endpoint'`
-4. Push to the branch: `git push origin feature/add-hourly-forecast`
+4. Push to the branch: `git push origin feature/hourly-forecast`
 5. Open a Pull Request
 
 ---
@@ -235,10 +274,10 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## 🙏 Acknowledgements
 
 - [WeatherAPI.com](https://www.weatherapi.com) for the free weather data API
-- [Google Fonts](https://fonts.google.com) — Outfit & Playfair Display
+- [Google Fonts](https://fonts.google.com) — Fraunces & DM Sans
 
 ---
 
 <div align="center">
-  Made with ☕ and Spring Boot
+  Made with ☕ Spring Boot and ⚛️ React
 </div>
