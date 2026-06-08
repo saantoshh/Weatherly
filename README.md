@@ -10,6 +10,8 @@
 
 **A full-stack weather application featuring a Spring Boot REST API backend and a stunning React frontend with real-time animated sky scenes, canvas particle effects, and a glassmorphism UI.**
 
+### 🚀 [Live Demo → weatherly-com.vercel.app](https://weatherly-com.vercel.app/)
+
 [Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [API Reference](#-api-reference) • [Project Structure](#-project-structure)
 
 </div>
@@ -43,6 +45,7 @@
 | **Animations** | Canvas API (`requestAnimationFrame`), CSS keyframes |
 | **Fonts** | Google Fonts — Fraunces (display) + DM Sans (body) |
 | **Build Tool** | Maven + Vite (or CRA) |
+| **Deployment** | [Vercel](https://weatherly-com.vercel.app/) |
 
 ---
 
@@ -275,9 +278,12 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 - [WeatherAPI.com](https://www.weatherapi.com) for the free weather data API
 - [Google Fonts](https://fonts.google.com) — Fraunces & DM Sans
+- [Vercel](https://vercel.com) for free hosting
 
 ---
 
 <div align="center">
   Made with ☕ Spring Boot and ⚛️ React
+  <br><br>
+  🌐 <strong><a href="https://weatherly-com.vercel.app/">Live Demo</a></strong>
 </div>
